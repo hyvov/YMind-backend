@@ -24,7 +24,7 @@ spring:
   # todo 需替换配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://118.25.185.81:3306/my_db
+    url: jdbc:mysql://118.25.185.81:3306/ymind
     username: root
     password: 123456
 
