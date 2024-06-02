@@ -13,9 +13,12 @@ import com.yu.ymind.model.dto.useranswer.UserAnswerAddRequest;
 import com.yu.ymind.model.dto.useranswer.UserAnswerEditRequest;
 import com.yu.ymind.model.dto.useranswer.UserAnswerQueryRequest;
 import com.yu.ymind.model.dto.useranswer.UserAnswerUpdateRequest;
+import com.yu.ymind.model.entity.App;
 import com.yu.ymind.model.entity.UserAnswer;
 import com.yu.ymind.model.entity.User;
 import com.yu.ymind.model.vo.UserAnswerVO;
+import com.yu.ymind.scoring.ScoringStrategyExecutor;
+import com.yu.ymind.service.AppService;
 import com.yu.ymind.service.UserAnswerService;
 import com.yu.ymind.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +27,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+import static org.bouncycastle.its.asn1.EndEntityType.app;
 
 /**
  * 用户答案接口
@@ -40,6 +46,10 @@ public class UserAnswerController {
 
     @Resource
     private UserService userService;
+    @Resource
+    private AppService appService;
+    @Resource
+    private ScoringStrategyExecutor scoringStrategyExecutor;
 
     // region 增删改查
 
@@ -56,6 +66,12 @@ public class UserAnswerController {
         // todo 在此处将实体类和 DTO 进行转换
         UserAnswer userAnswer = new UserAnswer();
         BeanUtils.copyProperties(userAnswerAddRequest, userAnswer);
+        List<String> choices = userAnswerAddRequest.getChoices();
+        // 判断是否存在
+        Long appId = userAnswerAddRequest.getAppId();
+        App app = appService.getById(appService.getById( appId));
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+
         // 数据校验
         userAnswerService.validUserAnswer(userAnswer, true);
         // todo 填充默认值
@@ -66,6 +82,20 @@ public class UserAnswerController {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         // 返回新写入的数据 id
         long newUserAnswerId = userAnswer.getId();
+        //调用评分模块
+
+
+        try {
+            UserAnswer userAnswerWithResult = scoringStrategyExecutor.doScore(choices, app);
+            userAnswerWithResult.setId(newUserAnswerId);
+            userAnswerService.updateById(userAnswerWithResult);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "评分模块调用失败");
+        }
+
         return ResultUtils.success(newUserAnswerId);
     }
 

@@ -51,25 +51,12 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
     public void validUserAnswer(UserAnswer userAnswer, boolean add) {
         ThrowUtils.throwIf(userAnswer == null, ErrorCode.PARAMS_ERROR);
         // todo 从对象中取值
-        Long id = userAnswer.getId();
         Long appId = userAnswer.getAppId();
-        Integer appType = userAnswer.getAppType();
-        Integer scoringStrategy = userAnswer.getScoringStrategy();
-        String choices = userAnswer.getChoices();
-        Long resultId = userAnswer.getResultId();
-        String resultName = userAnswer.getResultName();
-        String resultDesc = userAnswer.getResultDesc();
-        String resultPicture = userAnswer.getResultPicture();
-        Integer resultScore = userAnswer.getResultScore();
-        Long userId = userAnswer.getUserId();
-        Date createTime = userAnswer.getCreateTime();
-        Date updateTime = userAnswer.getUpdateTime();
-        Integer isDelete = userAnswer.getIsDelete();
 
         // 创建数据时，参数不能为空
         if (add) {
             // todo 补充校验规则
-            ThrowUtils.throwIf(appId!=null|| appId <=0, ErrorCode.PARAMS_ERROR, "AppId非法");
+            ThrowUtils.throwIf( appId <= 0, ErrorCode.PARAMS_ERROR, "AppId非法");
         }
         // 修改数据时，有参数则校验
         // todo 补充校验规则
@@ -106,8 +93,6 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
         Long userId = userAnswerQueryRequest.getUserId();
         Long notId = userAnswerQueryRequest.getNotId();
         String searchText = userAnswerQueryRequest.getSearchText();
-        int current = userAnswerQueryRequest.getCurrent();
-        int pageSize = userAnswerQueryRequest.getPageSize();
         String sortField = userAnswerQueryRequest.getSortField();
         String sortOrder = userAnswerQueryRequest.getSortOrder();
 

@@ -71,7 +71,7 @@ public class ScoringResultServiceImpl extends ServiceImpl<ScoringResultMapper, S
         // 修改数据时，有参数则校验
         // todo 补充校验规则
         if (StringUtils.isNotBlank(resultName)) {
-            ThrowUtils.throwIf(appId!=null||appId<=0, ErrorCode.PARAMS_ERROR, "AppId非法");
+            ThrowUtils.throwIf(appId <= 0, ErrorCode.PARAMS_ERROR, "AppId非法");
         }
     }
 
