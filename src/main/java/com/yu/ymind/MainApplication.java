@@ -12,7 +12,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * 该类使用了 Spring Boot 注解来配置和启动应用程序。
  **/
 // 声明该类是 Spring Boot 应用程序的主类，并排除了 Redis 的自动配置,要使用redis，删除括号及内容
-@SpringBootApplication(exclude = {RedisAutoConfiguration.class})
+//@SpringBootApplication(exclude = {RedisAutoConfiguration.class})
+@SpringBootApplication
 // 扫描 Mapper 接口所在的包，用于自动配置 MyBatis 的 Mapper 接口实现
 @MapperScan("com.yu.ymind.mapper")
 // 启用 Spring 的定时任务功能

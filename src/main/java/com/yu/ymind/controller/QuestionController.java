@@ -1,7 +1,10 @@
 package com.yu.ymind.controller;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sun.org.apache.bcel.internal.generic.I2F;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import com.yu.ymind.annotation.AuthCheck;
 import com.yu.ymind.common.BaseResponse;
 import com.yu.ymind.common.DeleteRequest;
@@ -20,18 +23,22 @@ import com.yu.ymind.model.vo.QuestionVO;
 import com.yu.ymind.service.AppService;
 import com.yu.ymind.service.QuestionService;
 import com.yu.ymind.service.UserService;
+import com.zhipu.oapi.service.v4.model.ModelData;
+import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 问题接口
- *
- *
  */
 @RestController
 @RequestMapping("/question")
@@ -128,6 +135,8 @@ public class QuestionController {
         // 判断是否存在
         long id = questionUpdateRequest.getId();
         Question oldQuestion = questionService.getById(id);
+
+
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 操作数据库
         boolean result = questionService.updateById(question);
@@ -236,6 +245,7 @@ public class QuestionController {
         // 判断是否存在
         long id = questionEditRequest.getId();
         Question oldQuestion = questionService.getById(id);
+
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可编辑
         if (!oldQuestion.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
@@ -267,7 +277,6 @@ public class QuestionController {
             "4. 返回的题目列表格式必须为 JSON 数组";
 
     /**
-     *
      * 生成题目的用户消息
      *
      * @param app
@@ -305,5 +314,62 @@ public class QuestionController {
         List<QuestionContentDTO> questionContentDTOList = JSONUtil.toList(json, QuestionContentDTO.class);
         return ResultUtils.success(questionContentDTOList);
     }
+
+    @GetMapping("/ai_generate/sse")
+    public SseEmitter aiGenerateQuestionSSE(AiGenerateQuestionRequest aiGenerateQuestionRequest) {
+        ThrowUtils.throwIf(aiGenerateQuestionRequest == null, ErrorCode.PARAMS_ERROR);
+        // 获取参数
+        Long appId = aiGenerateQuestionRequest.getAppId();
+        int questionNumber = aiGenerateQuestionRequest.getQuestionNumber();
+        int optionNumber = aiGenerateQuestionRequest.getOptionNumber();
+        //获取应用行行
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+        // 封装 Prompt
+        String userMessage = getGenerateQuestionUserMessage(app, questionNumber, optionNumber);
+        //建立SSE连接对象，0表示永不超时
+        SseEmitter sseEmitter = new SseEmitter(0L);
+
+        // AI 生成,SSE流式返回
+        Flowable<ModelData> modelDataFlowable = aiManager.doStreamRequest(GENERATE_QUESTION_SYSTEM_MESSAGE, userMessage, null);
+        // 结果处理
+        AtomicInteger counter = new AtomicInteger(0);
+        //拼接完整题目
+        StringBuilder stringBuilder = new StringBuilder();
+        modelDataFlowable
+                .observeOn(Schedulers.io())
+                .map(modelData -> modelData.getChoices().get(0).getDelta().getContent())
+                .map(message -> message.replaceAll("\\s", ""))
+                .filter(StrUtil::isNotBlank)
+                .flatMap(message -> {
+                    List<Character> characterList = new ArrayList<>();
+                    for (char c : message.toCharArray()) {
+                        characterList.add(c);
+                    }
+                    return Flowable.fromIterable(characterList);
+                })
+                .doOnNext(c -> {
+                    if (c == '{') {
+                        counter.addAndGet(1);
+                    }
+                    if (counter.get() > 0) {
+                        stringBuilder.append(c);
+                    }
+                    if (c == '}') {
+                        counter.addAndGet(-1);
+                        if (counter.get() == 0) {
+                            sseEmitter.send(JSONUtil.toJsonStr(stringBuilder.toString()));
+                            //重置，准备拼接下一道题
+                            stringBuilder.setLength(0);
+                        }
+                    }
+
+                })
+                .doOnError((e) -> log.error("sse error", e))
+                .doOnComplete(sseEmitter::complete)
+                .subscribe();
+        return sseEmitter;
+    }
+
     // endregion
 }
