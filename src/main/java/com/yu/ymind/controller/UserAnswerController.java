@@ -37,8 +37,6 @@ import static org.bouncycastle.its.asn1.EndEntityType.app;
 
 /**
  * 用户答案接口
- *
- *
  */
 @RestController
 @RequestMapping("/userAnswer")
@@ -76,7 +74,7 @@ public class UserAnswerController {
         userAnswerService.validUserAnswer(userAnswer, true);
         // 判断app是否存在
         Long appId = userAnswerAddRequest.getAppId();
-        App app = appService.getById(appService.getById( appId));
+        App app = appService.getById(appService.getById(appId));
         ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
         if (!ReviewStatusEnum.PASS.equals(ReviewStatusEnum.getEnumByValue(app.getReviewStatus()))) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "应用未通过审核，无法答题");
@@ -212,7 +210,7 @@ public class UserAnswerController {
      */
     @PostMapping("/list/page/vo")
     public BaseResponse<Page<UserAnswerVO>> listUserAnswerVOByPage(@RequestBody UserAnswerQueryRequest userAnswerQueryRequest,
-                                                               HttpServletRequest request) {
+                                                                   HttpServletRequest request) {
         long current = userAnswerQueryRequest.getCurrent();
         long size = userAnswerQueryRequest.getPageSize();
         // 限制爬虫
@@ -233,7 +231,7 @@ public class UserAnswerController {
      */
     @PostMapping("/my/list/page/vo")
     public BaseResponse<Page<UserAnswerVO>> listMyUserAnswerVOByPage(@RequestBody UserAnswerQueryRequest userAnswerQueryRequest,
-                                                                 HttpServletRequest request) {
+                                                                     HttpServletRequest request) {
         ThrowUtils.throwIf(userAnswerQueryRequest == null, ErrorCode.PARAMS_ERROR);
         // 补充查询条件，只查询当前登录用户的数据
         User loginUser = userService.getLoginUser(request);
@@ -286,7 +284,6 @@ public class UserAnswerController {
     public BaseResponse<Long> generateUserAnswerId() {
         return ResultUtils.success(IdUtil.getSnowflakeNextId());
     }
-
 
 
     // endregion
