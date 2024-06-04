@@ -50,16 +50,15 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
     @Override
     public void validUserAnswer(UserAnswer userAnswer, boolean add) {
         ThrowUtils.throwIf(userAnswer == null, ErrorCode.PARAMS_ERROR);
-        // todo 从对象中取值
+        // 从对象中取值
         Long appId = userAnswer.getAppId();
-
+        Long id = userAnswer.getId();
         // 创建数据时，参数不能为空
         if (add) {
-            // todo 补充校验规则
             ThrowUtils.throwIf( appId <= 0, ErrorCode.PARAMS_ERROR, "AppId非法");
+            ThrowUtils.throwIf(id == null || id <= 0, ErrorCode.PARAMS_ERROR, "id 不存在");
         }
         // 修改数据时，有参数则校验
-        // todo 补充校验规则
         if (appId!=null) {
             App app=appService.getById(appId);
             ThrowUtils.throwIf(app== null, ErrorCode.PARAMS_ERROR, "APP不存在 ");
