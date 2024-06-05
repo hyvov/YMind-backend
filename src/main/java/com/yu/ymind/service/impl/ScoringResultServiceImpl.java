@@ -9,10 +9,12 @@ import com.yu.ymind.constant.CommonConstant;
 import com.yu.ymind.exception.ThrowUtils;
 import com.yu.ymind.mapper.ScoringResultMapper;
 import com.yu.ymind.model.dto.scoringresult.ScoringResultQueryRequest;
+import com.yu.ymind.model.entity.App;
 import com.yu.ymind.model.entity.ScoringResult;
 import com.yu.ymind.model.entity.User;
 import com.yu.ymind.model.vo.ScoringResultVO;
 import com.yu.ymind.model.vo.UserVO;
+import com.yu.ymind.service.AppService;
 import com.yu.ymind.service.ScoringResultService;
 import com.yu.ymind.service.UserService;
 import com.yu.ymind.utils.SqlUtils;
@@ -37,7 +39,8 @@ public class ScoringResultServiceImpl extends ServiceImpl<ScoringResultMapper, S
 
     @Resource
     private UserService userService;
-
+    @Resource
+    private AppService appService;
     /**
      * 校验数据
      *
@@ -51,14 +54,14 @@ public class ScoringResultServiceImpl extends ServiceImpl<ScoringResultMapper, S
         Long id = scoringResult.getId();
         String resultName = scoringResult.getResultName();
         String resultDesc = scoringResult.getResultDesc();
-        String resultPicture = scoringResult.getResultPicture();
+//        String resultPicture = scoringResult.getResultPicture();
         String resultProp = scoringResult.getResultProp();
-        Integer resultScoreRange = scoringResult.getResultScoreRange();
+//        Integer resultScoreRange = scoringResult.getResultScoreRange();
         Long appId = scoringResult.getAppId();
-        Long userId = scoringResult.getUserId();
-        Date createTime = scoringResult.getCreateTime();
-        Date updateTime = scoringResult.getUpdateTime();
-        Integer isDelete = scoringResult.getIsDelete();
+//        Long userId = scoringResult.getUserId();
+//        Date createTime = scoringResult.getCreateTime();
+//        Date updateTime = scoringResult.getUpdateTime();
+//        Integer isDelete = scoringResult.getIsDelete();
 
         // 创建数据时，参数不能为空
         if (add) {
@@ -69,9 +72,14 @@ public class ScoringResultServiceImpl extends ServiceImpl<ScoringResultMapper, S
             ThrowUtils.throwIf(appId==null, ErrorCode.PARAMS_ERROR,"AppId不能为空");
         }
         // 修改数据时，有参数则校验
-        // todo 补充校验规则
+        // 补充校验规则
         if (StringUtils.isNotBlank(resultName)) {
-            ThrowUtils.throwIf(appId <= 0, ErrorCode.PARAMS_ERROR, "AppId非法");
+            ThrowUtils.throwIf(resultName.length() > 128, ErrorCode.PARAMS_ERROR, "结果名称不能超过 128");
+        }
+        // 补充校验规则
+        if (appId != null) {
+            App app = appService.getById(appId);
+            ThrowUtils.throwIf(app == null, ErrorCode.PARAMS_ERROR, "应用不存在");
         }
     }
 

@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import com.yu.ymind.common.BaseResponse;
 import com.yu.ymind.common.ErrorCode;
 import com.yu.ymind.common.ResultUtils;
+import com.yu.ymind.config.CosClientConfig;
 import com.yu.ymind.constant.FileConstant;
 import com.yu.ymind.exception.BusinessException;
 import com.yu.ymind.manager.CosManager;
@@ -38,6 +39,7 @@ public class FileController {
     @Resource
     private CosManager cosManager;
 
+
     /**
      * 文件上传
      *
@@ -67,6 +69,7 @@ public class FileController {
             multipartFile.transferTo(file);
             cosManager.putObject(filepath, file);
             // 返回可访问地址
+//            System.out.println("https://"+bucket+".cos."+region+".myqcloud.com/"+filepath);
             return ResultUtils.success(FileConstant.COS_HOST + filepath);
         } catch (Exception e) {
             log.error("file upload error, filepath = " + filepath, e);
@@ -94,9 +97,10 @@ public class FileController {
         // 文件后缀
         String fileSuffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
         final long ONE_M = 1024 * 1024L;
+        final long FOUR_M = 1024 * 1024L * 4;
         if (FileUploadBizEnum.USER_AVATAR.equals(fileUploadBizEnum)) {
-            if (fileSize > ONE_M) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小不能超过 1M");
+            if (fileSize > FOUR_M) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小不能超过 4M");
             }
             if (!Arrays.asList("jpeg", "jpg", "svg", "png", "webp").contains(fileSuffix)) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件类型错误");

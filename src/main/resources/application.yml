@@ -127,10 +127,10 @@ wx:
 # todo 需替换配置
 cos:
   client:
-    accessKey: xxx
-    secretKey: xxx
-    region: xxx
-    bucket: xxx
+    accessKey: AKID9D4zpY4a0GKCyhFdvZHqGV4hamU3Qfif
+    secretKey: sfYN5a6bK2fDgy33EKNK62pOnJljcZhy
+    region: ap-shanghai
+    bucket: ymind-1307828773
 # 接口文档配置
 knife4j:
   enable: true

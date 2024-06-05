@@ -15,8 +15,10 @@ class CosManagerTest {
     @Resource
     private CosManager cosManager;
 
+    String filePath="G:\\object\\YMind\\YMind-backend\\src\\test\\java\\com\\yu\\ymind\\manager\\test.txt";
+
     @Test
     void putObject() {
-        cosManager.putObject("test", "test.json");
+        cosManager.putObject("test", filePath);
     }
 }
