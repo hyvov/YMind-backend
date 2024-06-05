@@ -52,23 +52,23 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     @Override
     public void validQuestion(Question question, boolean add) {
         ThrowUtils.throwIf(question == null, ErrorCode.PARAMS_ERROR);
-        // todo 从对象中取值
-        Long id = question.getId();
+        //  从对象中取值
+//        Long id = question.getId();
         String questionContent = question.getQuestionContent();
         Long appId = question.getAppId();
-        Long userId = question.getUserId();
-        Date createTime = question.getCreateTime();
-        Date updateTime = question.getUpdateTime();
-        Integer isDelete = question.getIsDelete();
+//        Long userId = question.getUserId();
+//        Date createTime = question.getCreateTime();
+//        Date updateTime = question.getUpdateTime();
+//        Integer isDelete = question.getIsDelete();
 
         // 创建数据时，参数不能为空
         if (add) {
-            // todo 补充校验规则
+            //  补充校验规则
             ThrowUtils.throwIf(StringUtils.isBlank(questionContent), ErrorCode.PARAMS_ERROR,"问题内容不能为空");
             ThrowUtils.throwIf(appId==null||appId<=0, ErrorCode.PARAMS_ERROR,"appId非法");
         }
         // 修改数据时，有参数则校验
-        // todo 补充校验规则
+        // 补充校验规则
         if (appId!=null) {
             App app=appService.getById(appId);
             ThrowUtils.throwIf(app== null, ErrorCode.PARAMS_ERROR, "APP不存在 ");
@@ -176,15 +176,12 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             return QuestionVO.objToVo(question);
         }).collect(Collectors.toList());
 
-        // todo 可以根据需要为封装对象补充值，不需要的内容可以删除
+        // 可以根据需要为封装对象补充值，不需要的内容可以删除
         // region 可选
         // 1. 关联查询用户信息
         Set<Long> userIdSet = questionList.stream().map(Question::getUserId).collect(Collectors.toSet());
         Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
-        // 2. 已登录，获取用户点赞、收藏状态
-        User loginUser = userService.getLoginUserPermitNull(request);
-
         // 填充信息
         questionVOList.forEach(questionVO -> {
             Long userId = questionVO.getUserId();

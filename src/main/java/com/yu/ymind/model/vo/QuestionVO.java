@@ -94,7 +94,7 @@ public class QuestionVO implements Serializable {
             return null;
         }
         QuestionVO questionVO = new QuestionVO();
-//        BeanUtils.copyProperties(question, questionVO);
+        BeanUtils.copyProperties(question, questionVO);
 //             return questionVO;
         String questionContent = question.getQuestionContent();//从question对象中获取question内容
         if (questionContent != null) {

@@ -71,14 +71,14 @@ public class QuestionController {
      * @param request
      * @return
      */
+
     @PostMapping("/add")
     public BaseResponse<Long> addQuestion(@RequestBody QuestionAddRequest questionAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(questionAddRequest == null, ErrorCode.PARAMS_ERROR);
-        // todo 在此处将实体类和 DTO 进行转换
+        // 在此处将实体类和 DTO 进行转换
         Question question = new Question();
         BeanUtils.copyProperties(questionAddRequest, question);
         List<QuestionContentDTO> questionContentDTO = questionAddRequest.getQuestionContent();
-
         question.setQuestionContent(JSONUtil.toJsonStr(questionContentDTO));
         // 数据校验
         questionService.validQuestion(question, true);
@@ -142,7 +142,6 @@ public class QuestionController {
         // 判断是否存在
         long id = questionUpdateRequest.getId();
         Question oldQuestion = questionService.getById(id);
-
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 操作数据库
         boolean result = questionService.updateById(question);
@@ -243,6 +242,7 @@ public class QuestionController {
         }
         // 此处将实体类和 DTO 进行转换
         Question question = new Question();
+        BeanUtils.copyProperties(questionEditRequest, question);
         List<QuestionContentDTO> questionContentDTO = questionEditRequest.getQuestionContent();
         question.setQuestionContent(JSONUtil.toJsonStr(questionContentDTO));
         // 数据校验
