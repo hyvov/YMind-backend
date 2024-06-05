@@ -1,14 +1,21 @@
 # 线上配置文件
 server:
   port: 8101
+  servlet:
+    session:
+      cookie:
+        # 解决跨域
+        same-site: none
+        secure: true
+
 spring:
   #  # 数据库配置
   #  # todo 需替换配置
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://118.25.185.81:3306/ymind
-    username: root
-    password: mysql_er1wdrq
+  #  datasource:
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
+  #    url: jdbc:mysql://118.25.185.81:3306/ymind
+  #    username: root
+  #    password: mysql_er1wdrq
 
   shardingsphere:
     #数据源配置
@@ -81,9 +88,9 @@ mybatis-plus:
     # 生产环境关闭日志
     log-impl: ''
 
-## 接口文档配置
-#knife4j:
-#  basic:
-#    enable: true
-#    username: root
-#    password: 12345678i
+# 接口文档配置
+knife4j:
+  basic:
+    enable: true
+    username: hyu
+    password: 123456
