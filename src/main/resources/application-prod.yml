@@ -2,34 +2,88 @@
 server:
   port: 8101
 spring:
-  # 数据库配置
-  # todo 需替换配置
+  #  # 数据库配置
+  #  # todo 需替换配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/ymind
+    url: jdbc:mysql://118.25.185.81:3306/ymind
     username: root
-    password: 123456
+    password: mysql_er1wdrq
+
+  shardingsphere:
+    #数据源配置
+    datasource:
+      # 多数据源以逗号隔开即可
+      names: ymind
+      ymind:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://118.25.185.81:3306/ymind
+        username: root
+        password: mysql_er1wdrq
+    # 规则配置
+    rules:
+      sharding:
+        # 分片算法配置
+        sharding-algorithms:
+          # 自定义分片规则名
+          answer-table-inline:
+            ## inline 类型是简单的配置文件里面就能写的类型，其他还有自定义类等等
+            type: INLINE
+            props:
+              algorithm-expression: user_answer_$->{appId % 2}
+        tables:
+          user_answer:
+            actual-data-nodes: ymind.user_answer_$->{0..1}
+            # 分表策略
+            table-strategy:
+              standard:
+                sharding-column: appId
+                sharding-algorithm-name: answer-table-inline
+
+
   # Redis 配置
   # todo 需替换配置
   redis:
     database: 1
-    host: localhost
+    host: 118.25.185.81
     port: 6379
     timeout: 5000
-    password: 123456
-  # Elasticsearch 配置
+    password: 12345678i
+
+  #  # Elasticsearch 配置
+  #  # todo 需替换配置
+  #  elasticsearch:
+  #    uris: http://localhost:9200
+  #    username: root
+  #    password: 123456
+
+  # 文件上传
+  servlet:
+    multipart:
+      # 大小限制
+      max-file-size: 10MB
+
+ai:
+  apiKey: 601de875080759e60d34443bd20ac539.aAj32MPBbIYp1idB
+
+  # 对象存储
   # todo 需替换配置
-  elasticsearch:
-    uris: http://localhost:9200
-    username: root
-    password: 123456
+  cos:
+    client:
+      accessKey: AKID9D4zpY4a0GKCyhFdvZHqGV4hamU3Qfif
+      secretKey: sfYN5a6bK2fDgy33EKNK62pOnJljcZhy
+      region: ap-shanghai
+      bucket: ymind-1307828773
+
 mybatis-plus:
   configuration:
     # 生产环境关闭日志
     log-impl: ''
-# 接口文档配置
-knife4j:
-  basic:
-    enable: true
-    username: root
-    password: 123456
+
+## 接口文档配置
+#knife4j:
+#  basic:
+#    enable: true
+#    username: root
+#    password: 12345678i
