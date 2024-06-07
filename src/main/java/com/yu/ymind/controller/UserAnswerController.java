@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Random;
 
 import static org.bouncycastle.its.asn1.EndEntityType.app;
 
@@ -101,6 +102,25 @@ public class UserAnswerController {
         //调用评分模块
         try {
             UserAnswer userAnswerWithResult = scoringStrategyExecutor.doScore(choices, app);
+            //如果app的评分模块为AI则添加固定图片
+            System.out.println(  "app.getScoringStrategy() = "+app.getScoringStrategy());
+
+            //todo 如果为ai打，set随机图片
+            String[] imageUrls = {
+                    "https://ymind-1307828773.cos.ap-shanghai.myqcloud.com//score_result_picture/AI/AI1.jpeg",
+                    "https://ymind-1307828773.cos.ap-shanghai.myqcloud.com//score_result_picture/AI/AI2.jpeg",
+                    "https://ymind-1307828773.cos.ap-shanghai.myqcloud.com//score_result_picture/AI/AI3.jpeg",
+                    "https://ymind-1307828773.cos.ap-shanghai.myqcloud.com//score_result_picture/AI/AI4.jpeg",
+                    "https://ymind-1307828773.cos.ap-shanghai.myqcloud.com//score_result_picture/AI/AI5.jpeg",
+                    "https://ymind-1307828773.cos.ap-shanghai.myqcloud.com//score_result_picture/AI/AI6.jpeg"
+            };
+
+
+            if ( app.getScoringStrategy().equals(1)){
+                String randomImageUrl = imageUrls[new Random().nextInt(imageUrls.length)];
+                userAnswerWithResult.setResultPicture(randomImageUrl);
+            }
+
             userAnswerWithResult.setId(newUserAnswerId);
             userAnswerWithResult.setAppId(null);
             userAnswerService.updateById(userAnswerWithResult);

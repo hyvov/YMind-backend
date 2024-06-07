@@ -320,8 +320,72 @@ public class QuestionController {
         return ResultUtils.success(questionContentDTOList);
     }
 
+//    @GetMapping("/ai_generate/sse")
+//    public SseEmitter aiGenerateQuestionSSE(@RequestBody AiGenerateQuestionRequest aiGenerateQuestionRequest,HttpServletRequest request) {
+//        ThrowUtils.throwIf(aiGenerateQuestionRequest == null, ErrorCode.PARAMS_ERROR);
+//        // 获取参数
+//        Long appId = aiGenerateQuestionRequest.getAppId();
+//        int questionNumber = aiGenerateQuestionRequest.getQuestionNumber();
+//        int optionNumber = aiGenerateQuestionRequest.getOptionNumber();
+//        //获取应用行行
+//        App app = appService.getById(appId);
+//        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+//        // 封装 Prompt
+//        String userMessage = getGenerateQuestionUserMessage(app, questionNumber, optionNumber);
+//        //建立SSE连接对象，0表示永不超时
+//        SseEmitter sseEmitter = new SseEmitter(0L);
+//        // AI 生成,SSE流式返回
+//        Flowable<ModelData> modelDataFlowable = aiManager.doStreamRequest(GENERATE_QUESTION_SYSTEM_MESSAGE, userMessage, null);
+//        // 结果处理 左括号计数器，除了默认值外，当回归为 0 时，表示左括号等于右括号，可以截取
+//        AtomicInteger counter = new AtomicInteger(0);
+//        //拼接完整题目
+//        StringBuilder stringBuilder = new StringBuilder();
+//        // 获取登录用户
+//        User loginUser = userService.getLoginUser(request);
+//
+//        // 默认全局线程池
+//        Scheduler scheduler = Schedulers.io();
+//        if ("admin".equals(loginUser.getUserRole())) {
+//            scheduler = vipScheduler;
+//        }
+//        modelDataFlowable
+//                .observeOn(scheduler)
+//                .observeOn(Schedulers.io())
+//                .map(modelData -> modelData.getChoices().get(0).getDelta().getContent())
+//                .map(message -> message.replaceAll("\\s", ""))
+//                .filter(StrUtil::isNotBlank)
+//                .flatMap(message -> {
+//                    List<Character> characterList = new ArrayList<>();
+//                    for (char c : message.toCharArray()) {
+//                        characterList.add(c);
+//                    }
+//                    return Flowable.fromIterable(characterList);
+//                })
+//                .doOnNext(c -> {
+//                    if (c == '{') {
+//                        counter.addAndGet(1);
+//                    }
+//                    if (counter.get() > 0) {
+//                        stringBuilder.append(c);
+//                    }
+//                    if (c == '}') {
+//                        counter.addAndGet(-1);
+//                        if (counter.get() == 0) {
+//                            sseEmitter.send(JSONUtil.toJsonStr(stringBuilder.toString()));
+//                            //重置，准备拼接下一道题
+//                            stringBuilder.setLength(0);
+//                        }
+//                    }
+//
+//                })
+//                .doOnError((e) -> log.error("sse error", e))
+//                .doOnComplete(sseEmitter::complete)
+//                .subscribe();
+//        return sseEmitter;
+//    }
+
     @GetMapping("/ai_generate/sse")
-    public SseEmitter aiGenerateQuestionSSE(AiGenerateQuestionRequest aiGenerateQuestionRequest,HttpServletRequest request) {
+    public SseEmitter aiGenerateQuestionSSE(AiGenerateQuestionRequest aiGenerateQuestionRequest) {
         ThrowUtils.throwIf(aiGenerateQuestionRequest == null, ErrorCode.PARAMS_ERROR);
         // 获取参数
         Long appId = aiGenerateQuestionRequest.getAppId();
@@ -336,20 +400,11 @@ public class QuestionController {
         SseEmitter sseEmitter = new SseEmitter(0L);
         // AI 生成,SSE流式返回
         Flowable<ModelData> modelDataFlowable = aiManager.doStreamRequest(GENERATE_QUESTION_SYSTEM_MESSAGE, userMessage, null);
-        // 结果处理 左括号计数器，除了默认值外，当回归为 0 时，表示左括号等于右括号，可以截取
+        // 结果处理
         AtomicInteger counter = new AtomicInteger(0);
         //拼接完整题目
         StringBuilder stringBuilder = new StringBuilder();
-
-        // 获取登录用户
-        User loginUser = userService.getLoginUser(request);
-        // 默认全局线程池
-        Scheduler scheduler = Schedulers.io();
-        if ("vip".equals(loginUser.getUserRole())) {
-            scheduler = vipScheduler;
-        }
         modelDataFlowable
-                .observeOn(scheduler)
                 .observeOn(Schedulers.io())
                 .map(modelData -> modelData.getChoices().get(0).getDelta().getContent())
                 .map(message -> message.replaceAll("\\s", ""))

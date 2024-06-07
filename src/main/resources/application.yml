@@ -54,16 +54,15 @@ spring:
 
 
 
-#  # 数据库配置
-#  # todo 需替换配置
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://118.25.185.81:3306/ymind
-#    username: root
-#    password: mysql_er1wdrq
+  #  # 数据库配置
+  #  # todo 需替换配置
+  #  datasource:
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
+  #    url: jdbc:mysql://118.25.185.81:3306/ymind
+  #    username: root
+  #    password: mysql_er1wdrq
 
   # Redis 配置
-  # todo 需替换配置，然后取消注释
   redis:
     database: 1
     host: 118.25.185.81
@@ -88,10 +87,14 @@ server:
   port: 8101
   servlet:
     context-path: /api
-    # cookie 30 天过期
+#     cookie 30 天过期
     session:
       cookie:
         max-age: 2592000
+        # 解决跨域
+        same-site: none
+        secure: true
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -101,7 +104,7 @@ mybatis-plus:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名
       logic-delete-value: 1 # 逻辑已删除值（默认为 1）
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
-# 微信相关
+## 微信相关
 wx:
   # 微信公众平台
   # todo 需替换配置
@@ -122,6 +125,7 @@ wx:
   open:
     appId: xxx
     appSecret: xxx
+
 # 对象存储
 # todo 需替换配置
 cos:
@@ -130,6 +134,7 @@ cos:
     secretKey: sfYN5a6bK2fDgy33EKNK62pOnJljcZhy
     region: ap-shanghai
     bucket: ymind-1307828773
+
 # 接口文档配置
 knife4j:
   enable: true
