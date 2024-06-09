@@ -80,7 +80,7 @@ public class AiTestScoreScoringStrategy implements ScoringStrategy {
         Long appId = app.getId();// 根据应用ID查询题目信息
 
         String jsonStr = JSONUtil.toJsonStr(choices);
-        String cacheKey = buildCacheKey(appId, jsonStr);
+        String cacheKey = buildCacheKey(appId, jsonStr);//构建缓存 key
         String answerJson = answerCacheMap.getIfPresent(cacheKey);
 
         if (StrUtil.isNotBlank(answerJson)) { //如果有缓存，直接返回
@@ -170,7 +170,10 @@ public class AiTestScoreScoringStrategy implements ScoringStrategy {
      * @return
      */
     private String buildCacheKey(Long appId, String choicesStr) {
-        return DigestUtil.md5Hex(appId + ":" + choicesStr);//使用hutool工具类加载缓存key
+        return DigestUtil.md5Hex(appId + ":" + choicesStr);
+        //使用hutool工具类加载缓存key
+        //将应用 id 和用户的答案列表作为 key。
+        //但答案列表可能很长，利用哈希算法（md5）来压缩 key，
     }
 
 }

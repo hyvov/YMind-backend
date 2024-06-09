@@ -16,7 +16,7 @@ spring:
 
   session:
     # todo 取消注释开启分布式 session（须先配置 Redis）
-    # store-type: redis
+    store-type: redis
     # 30 天过期
     timeout: 2592000
 
@@ -87,13 +87,14 @@ server:
   port: 8101
   servlet:
     context-path: /api
-#     cookie 30 天过期
+    #     cookie 30 天过期
     session:
       cookie:
         max-age: 2592000
+        path: /api
         # 解决跨域
-        same-site: none
-        secure: true
+#        same-site: none
+#        secure: true
 
 mybatis-plus:
   configuration:

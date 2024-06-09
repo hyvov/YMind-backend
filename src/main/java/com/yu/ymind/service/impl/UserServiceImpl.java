@@ -14,9 +14,12 @@ import com.yu.ymind.model.enums.UserRoleEnum;
 import com.yu.ymind.model.vo.LoginUserVO;
 import com.yu.ymind.model.vo.UserVO;
 import com.yu.ymind.service.UserService;
+import com.yu.ymind.utils.JwtUtils;
 import com.yu.ymind.utils.SqlUtils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -123,9 +126,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
+        // 3、将登录信息保持在token中，通过JWT生成token(存入id和账号)
+        Map<String, Object> tokenMap = new HashMap<>();
+        tokenMap.put("id", user.getId());
+        tokenMap.put("userAccount", user.getUserAccount());
+        String token = JwtUtils.getToken(tokenMap);
+        System.out.println("token: " + token);
+
+
         // 3. 记录用户的登录态
         request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
-        return this.getLoginUserVO(user);
+        LoginUserVO loginUserVO = this.getLoginUserVO(user);
+        loginUserVO.setToken(token);
+        return loginUserVO;
     }
 
     @Override
