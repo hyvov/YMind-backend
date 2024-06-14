@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 public enum FriendShipEnum {
 
     ACTIVE("好友关系正常", 0), // 待审核枚举值
+
     DELETED("好友已删除", 1), // 删除枚举值
+
     BLOCKED("已拉黑好友", 2), // 拉黑枚举值
 
     PENDING("好友请求待处理", 3), // 待处理枚举值

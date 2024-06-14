@@ -138,13 +138,18 @@ public class FriendShipServiceImpl extends ServiceImpl<FriendShipMapper, FriendS
         if (userId != null && userId > 0) {
             user = userService.getById(userId);
         }
+        User friend=null;
+        if (friendId != null && friendId > 0) {
+            friend=userService.getById(friendId);
+        }
         UserVO userVO = userService.getUserVO(user);
+        UserVO friendVO = userService.getUserVO(friend);
         friendShipVO.setUser(userVO);
         friendShipVO.setFriendId(friendId);
+        friendShipVO.setFriend(friendVO);
         friendShipVO.setStatus(status);
-        // 2. 已登录，获取用户点赞、收藏状态
-        long friendShipId = friendShip.getId();
-        User loginUser = userService.getLoginUserPermitNull(request);
+
+
         // endregion
 
         return friendShipVO;
@@ -175,15 +180,23 @@ public class FriendShipServiceImpl extends ServiceImpl<FriendShipMapper, FriendS
         Set<Long> userIdSet = friendShipList.stream().map(FriendShip::getUserId).collect(Collectors.toSet());
         Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
-
+        Set<Long> friendIdSet = friendShipList.stream().map(FriendShip::getFriendId).collect(Collectors.toSet());
+        Map<Long, List<User>> friendIdFriendListMap = userService.listByIds(friendIdSet).stream()
+                .collect(Collectors.groupingBy(User::getId));
 
         // 填充信息
         friendShipVOList.forEach(friendShipVO -> {
             Long userId = friendShipVO.getUserId();
-            User user = null;
+            Long friendId= friendShipVO.getFriendId();
+            User user = null,friend=null;
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
+            if (friendIdFriendListMap.containsKey(friendId)) {
+                friend = friendIdFriendListMap.get(friendId).get(0);
+            }
+
+            friendShipVO.setFriend(userService.getUserVO(friend));
             friendShipVO.setUser(userService.getUserVO(user));
 
         });

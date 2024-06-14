@@ -28,8 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * 用户好友关系接口
- *
- *
  */
 @RestController
 @RequestMapping("/friendShip")
@@ -166,7 +164,7 @@ public class FriendShipController {
      */
     @PostMapping("/list/page/vo")
     public BaseResponse<Page<FriendShipVO>> listFriendShipVOByPage(@RequestBody FriendShipQueryRequest friendShipQueryRequest,
-                                                               HttpServletRequest request) {
+                                                                   HttpServletRequest request) {
         long current = friendShipQueryRequest.getCurrent();
         long size = friendShipQueryRequest.getPageSize();
         // 限制爬虫
@@ -187,7 +185,7 @@ public class FriendShipController {
      */
     @PostMapping("/my/list/page/vo")
     public BaseResponse<Page<FriendShipVO>> listMyFriendShipVOByPage(@RequestBody FriendShipQueryRequest friendShipQueryRequest,
-                                                                 HttpServletRequest request) {
+                                                                     HttpServletRequest request) {
         ThrowUtils.throwIf(friendShipQueryRequest == null, ErrorCode.PARAMS_ERROR);
         // 补充查询条件，只查询当前登录用户的数据
         User loginUser = userService.getLoginUser(request);

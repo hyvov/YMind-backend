@@ -72,6 +72,10 @@ public class FriendShipVO implements Serializable {
      */
     private UserVO user;
 
+    /**
+     * 关联盆友信息
+     */
+    private UserVO friend;
 
 
     /**
